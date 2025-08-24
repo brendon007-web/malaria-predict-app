@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Monitoring - MalariaPredict</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Chart.js library for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .neumorphic { box-shadow: 8px 8px 15px #a3b1c6, -8px -8px 15px #ffffff; }
+        .neumorphic-dark { box-shadow: 5px 5px 10px #131820, -5px -5px 10px #212938; }
+        .medical-bg { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); min-height: 100vh; }
+        .dark .medical-bg { background: linear-gradient(135deg, #1A202C 0%, #2D3748 100%); }
+        .dark { background-color: #1A202C; color: #f7fafc; }
+    </style>
+</head>
+<body class="medical-bg transition-all duration-300">
+
+    <div class="container mx-auto px-4 py-8">
+        <header class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+            <h1 class="text-4xl font-bold text-blue-600">Real-Time Patient Monitoring</h1>
+            <a href="selection.html" class="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition">&larr; Back to Tools</a>
+        </header>
+
+        <!-- Live Data Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div class="neumorphic p-6 rounded-xl text-center">
+                <h2 class="text-2xl font-semibold mb-2">Temperature</h2>
+                <p class="text-5xl font-bold text-red-500"><span id="tempValue">--</span> °C</p>
+            </div>
+            <div class="neumorphic p-6 rounded-xl text-center">
+                <h2 class="text-2xl font-semibold mb-2">Blood Pressure</h2>
+                <p class="text-5xl font-bold text-indigo-500"><span id="bpValue">--/--</span></p>
+                <p class="text-sm text-gray-500">Systolic / Diastolic (mmHg)</p>
+            </div>
+        </div>
+
+        <!-- Graphs -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="neumorphic p-6 rounded-xl">
+                <canvas id="tempChart"></canvas>
+            </div>
+            <div class="neumorphic p-6 rounded-xl">
+                <canvas id="bpChart"></canvas>
+            </div>
+        </div>
+        <p class="text-center text-sm text-gray-500 mt-4">Last updated: <span id="lastUpdated">Never</span></p>
+    </div>
+
+    <script>
+        const tempValueEl = document.getElementById('tempValue');
+        const bpValueEl = document.getElementById('bpValue');
+        const lastUpdatedEl = document.getElementById('lastUpdated');
+        const API_URL = 'http://127.0.0.1:5000'; // Use 127.0.0.1 for browser access
+        const MAX_DATA_POINTS = 20; // Max points to show on the graph
+
+        // Chart Initialization
+        const createChart = (ctx, label) => {
+            return new Chart(ctx, {
+                type: 'line',
+                data: { labels: [], datasets: [{ label: label, data: [], borderColor: 'rgb(59, 130, 246)', tension: 0.1 }] },
+                options: { scales: { y: { beginAtZero: false } } }
+            });
+        };
+        const createBpChart = (ctx) => {
+             return new Chart(ctx, {
+                type: 'line',
+                data: { 
+                    labels: [], 
+                    datasets: [
+                        { label: 'Systolic', data: [], borderColor: 'rgb(129, 140, 248)', tension: 0.1 },
+                        { label: 'Diastolic', data: [], borderColor: 'rgb(165, 180, 252)', tension: 0.1 }
+                    ] 
+                },
+                options: { scales: { y: { beginAtZero: false } } }
+            });
+        };
+
+        const tempChart = createChart(document.getElementById('tempChart').getContext('2d'), 'Temperature (°C)');
+        const bpChart = createBpChart(document.getElementById('bpChart').getContext('2d'));
+
+        const updateChartData = (chart, label, newData) => {
+            chart.data.labels.push(label);
+            
+            // Handle multiple datasets for BP chart
+            if (Array.isArray(newData)) {
+                chart.data.datasets[0].data.push(newData[0]); // Systolic
+                chart.data.datasets[1].data.push(newData[1]); // Diastolic
+            } else {
+                chart.data.datasets[0].data.push(newData); // Temperature
+            }
+
+            if (chart.data.labels.length > MAX_DATA_POINTS) {
+                chart.data.labels.shift();
+                chart.data.datasets.forEach(dataset => dataset.data.shift());
+            }
+            chart.update();
+        };
+
+        const fetchData = async () => {
+            try {
+                const response = await fetch(`${API_URL}/monitoring/data`);
+                if (!response.ok) return;
+                const data = await response.json();
+
+                if (!data.timestamp) return; // Don't update if no data has been received yet
+
+                const updateTime = new Date(data.timestamp).toLocaleTimeString();
+
+                // Update text values
+                tempValueEl.textContent = data.temperature.toFixed(1);
+                bpValueEl.textContent = `${data.systolic_bp}/${data.diastolic_bp}`;
+                lastUpdatedEl.textContent = new Date(data.timestamp).toLocaleString();
+                
+                // Update charts
+                updateChartData(tempChart, updateTime, data.temperature);
+                updateChartData(bpChart, updateTime, [data.systolic_bp, data.diastolic_bp]);
+
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                lastUpdatedEl.textContent = "Connection Error";
+            }
+        };
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchData(); // Fetch immediately on load
+            setInterval(fetchData, 5000); // Then update every 5 seconds
+        });
+    </script>
+</body>
+</html>

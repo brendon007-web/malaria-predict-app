@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - AI in Healthcare</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Background image and overlay (unchanged) */
+        body {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('images/hel.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        /* Frosted glass effect for the content box (unchanged) */
+        .content-box {
+            background-color: rgba(26, 32, 44, 0.75); /* Slightly more opaque for better text readability */
+            backdrop-filter: blur(16px); /* Increased blur for a more premium feel */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* [ NEW ] Simple fade-in and slide-up animation for the content box */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            /* Apply the animation */
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 font-sans text-white">
+
+    <!-- [ MODIFIED ] Added fade-in-up class for animation -->
+    <div class="content-box max-w-5xl mx-auto p-8 md:p-16 rounded-3xl shadow-2xl text-center fade-in-up">
+        
+        <!-- Main Title with Gradient -->
+        <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-4">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-blue-500">
+                AI in Healthcare
+            </span>
+        </h1>
+
+        <!-- Subtitle -->
+        <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-12">
+            Empowering medical professionals with predictive insights to enhance patient care and improve diagnostic accuracy.
+        </p>
+
+        <!-- [ NEW ] Feature cards section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 text-left">
+            <!-- Feature 1: Accurate Diagnoses -->
+            <div class="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+                <div class="flex items-center justify-center h-12 w-12 rounded-full bg-blue-500/20 mb-4">
+                    <!-- Icon: Stethoscope -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.5 14l-3-3m0 0l-3 3m3-3v10a2 2 0 01-2 2h-1a2 2 0 01-2-2V8m0 0a2 2 0 012-2h1a2 2 0 012 2v2" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Accurate Diagnoses</h3>
+                <p class="text-gray-400">Leverage machine learning to identify patterns in complex medical data, leading to faster and more precise diagnoses.</p>
+            </div>
+            
+            <!-- Feature 2: Personalized Treatment -->
+            <div class="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+                <div class="flex items-center justify-center h-12 w-12 rounded-full bg-blue-500/20 mb-4">
+                    <!-- Icon: User -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Personalized Treatment</h3>
+                <p class="text-gray-400">Analyze patient data to recommend personalized treatment plans, improving outcomes and patient satisfaction.</p>
+            </div>
+
+            <!-- Feature 3: Operational Efficiency -->
+            <div class="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+                <div class="flex items-center justify-center h-12 w-12 rounded-full bg-blue-500/20 mb-4">
+                    <!-- Icon: Chart -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Operational Efficiency</h3>
+                <p class="text-gray-400">Optimize hospital workflows and resource management using predictive analytics, reducing costs and wait times.</p>
+            </div>
+        </div>
+
+        <!-- [ MODIFIED ] Enhanced Call-to-Action Button -->
+        <a href="login.html" 
+           class="inline-block bg-blue-600 text-white font-bold text-xl px-12 py-5 rounded-lg 
+                  shadow-lg shadow-blue-500/40 
+                  transition-all duration-300 ease-in-out 
+                  hover:bg-blue-700 hover:shadow-2xl hover:shadow-blue-500/60 hover:-translate-y-1">
+            Access the Platform &rarr;
+        </a>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glasgow Coma Scale - MalariaPredict</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .neumorphic { box-shadow: 8px 8px 15px #a3b1c6, -8px -8px 15px #ffffff; }
+        .neumorphic-dark { box-shadow: 5px 5px 10px #131820, -5px -5px 10px #212938; }
+        .medical-bg { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); }
+        .dark .medical-bg { background: linear-gradient(135deg, #1A202C 0%, #2D3748 100%); }
+        .dark { background-color: #1A202C; color: #f7fafc; }
+        .input-field { transition: all 0.2s ease-in-out; border-radius: 10px; padding: 12px; width: 100%; border: 1px solid #d1d5db; background-color: #ffffff; }
+        .dark .input-field { background-color: #2d3748; border: 1px solid #5a6578; color: #f7fafc; }
+        .form-section { background-color: rgba(255, 255, 255, 0.7); border: 1px solid rgba(209, 213, 219, 0.5); }
+        .dark .form-section { background-color: rgba(45, 55, 72, 0.5); border: 1px solid rgba(74, 85, 104, 0.5); }
+    </style>
+</head>
+<body class="medical-bg transition-all duration-300">
+
+    <div class="container mx-auto px-4 py-8 max-w-3xl">
+        <header class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+            <div>
+                <h1 class="text-4xl font-bold text-blue-600">Glasgow Coma Scale (GCS)</h1>
+                <a href="selection.html" class="text-blue-600 hover:underline">&larr; Back to Tools</a>
+            </div>
+            <a href="gcs_history.html" class="bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 transition">View Full History</a>
+        </header>
+
+        <div class="neumorphic p-6 rounded-xl">
+            <h2 class="text-2xl font-semibold mb-4">Patient Assessment</h2>
+            <form id="gcsForm" class="space-y-6">
+                <div>
+                    <label for="patient_name" class="block font-semibold mb-2">Patient Name</label>
+                    <input type="text" id="patient_name" name="patient_name" class="input-field" placeholder="Enter patient's full name" required>
+                </div>
+                <hr class="dark:border-gray-600">
+                <div class="form-section p-4 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-3">1. Eye Opening (E)</h3>
+                    <div class="space-y-2"><label class="flex items-center"><input type="radio" name="eye" value="4" class="mr-2" required>Spontaneous (4)</label><label class="flex items-center"><input type="radio" name="eye" value="3" class="mr-2">To speech (3)</label><label class="flex items-center"><input type="radio" name="eye" value="2" class="mr-2">To pain (2)</label><label class="flex items-center"><input type="radio" name="eye" value="1" class="mr-2">No response (1)</label></div>
+                </div>
+                <div class="form-section p-4 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-3">2. Verbal Response (V)</h3>
+                    <div class="space-y-2"><label class="flex items-center"><input type="radio" name="verbal" value="5" class="mr-2" required>Oriented (5)</label><label class="flex items-center"><input type="radio" name="verbal" value="4" class="mr-2">Confused (4)</label><label class="flex items-center"><input type="radio" name="verbal" value="3" class="mr-2">Inappropriate words (3)</label><label class="flex items-center"><input type="radio" name="verbal" value="2" class="mr-2">Incomprehensible sounds (2)</label><label class="flex items-center"><input type="radio" name="verbal" value="1" class="mr-2">No response (1)</label></div>
+                </div>
+                <div class="form-section p-4 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-3">3. Motor Response (M)</h3>
+                    <div class="space-y-2"><label class="flex items-center"><input type="radio" name="motor" value="6" class="mr-2" required>Obeys commands (6)</label><label class="flex items-center"><input type="radio" name="motor" value="5" class="mr-2">Localizes to pain (5)</label><label class="flex items-center"><input type="radio" name="motor" value="4" class="mr-2">Withdraws from pain (4)</label><label class="flex items-center"><input type="radio" name="motor" value="3" class="mr-2">Flexion to pain (decorticate) (3)</label><label class="flex items-center"><input type="radio" name="motor" value="2" class="mr-2">Extension to pain (decerebrate) (2)</label><label class="flex items-center"><input type="radio" name="motor" value="1" class="mr-2">No response (1)</label></div>
+                </div>
+                <button type="submit" id="submitButton" class="w-full bg-blue-600 text-white py-3 mt-4 rounded-lg hover:bg-blue-700 transition-colors text-lg font-bold">
+                    Calculate & View Result
+                </button>
+            </form>
+        </div>
+        
+        <footer class="text-center mt-8">
+            <button id="themeToggle" class="bg-white/70 dark:bg-gray-800/70 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-lg text-sm shadow-lg backdrop-filter backdrop-blur-md">Toggle Theme</button>
+        </footer>
+    </div>
+
+    <script>
+        const gcsForm = document.getElementById('gcsForm');
+        const submitButton = document.getElementById('submitButton');
+        const API_URL = 'http://127.0.0.1:5000';
+
+        const getInterpretation = (score) => {
+            if (score >= 13) return { text: 'Mild', colorClass: 'text-green-600 dark:text-green-400' };
+            if (score >= 9) return { text: 'Moderate', colorClass: 'text-yellow-600 dark:text-yellow-400' };
+            return { text: 'Severe', colorClass: 'text-red-600 dark:text-red-500' };
+        };
+
+        gcsForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            submitButton.disabled = true;
+            submitButton.textContent = 'Saving...';
+            
+            const patientName = document.getElementById('patient_name').value;
+            const eyeScore = parseInt(gcsForm.querySelector('input[name="eye"]:checked').value);
+            const verbalScore = parseInt(gcsForm.querySelector('input[name="verbal"]:checked').value);
+            const motorScore = parseInt(gcsForm.querySelector('input[name="motor"]:checked').value);
+            const totalScore = eyeScore + verbalScore + motorScore;
+            const { text: interpretationText, colorClass } = getInterpretation(totalScore);
+
+            const resultData = {
+                patient_name: patientName,
+                eye_score: eyeScore,
+                verbal_score: verbalScore,
+                motor_score: motorScore,
+                total_score: totalScore,
+                interpretation: interpretationText,
+                colorClass: colorClass
+            };
+            
+            try {
+                // First, save the data to the backend
+                const response = await fetch(`${API_URL}/gcs/save`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(resultData)
+                });
+                
+                // *** THIS IS THE CRITICAL FIX ***
+                // Check if the server responded successfully (e.g., status 200 OK)
+                if (!response.ok) {
+                    // If not, create an error to be handled by the catch block
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                // If saving was successful, store data for the result page
+                localStorage.setItem('gcsResultData', JSON.stringify(resultData));
+                
+                // NOW, it is safe to redirect
+                window.location.href = 'gcs_result.html';
+
+            } catch (error) {
+                console.error('Error saving GCS record:', error);
+                alert('Failed to save record. Please ensure the backend server is running and accessible.');
+                submitButton.disabled = false;
+                submitButton.textContent = 'Calculate & View Result';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Theme toggle logic
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
+            const applyTheme = (isDark) => {
+                if (isDark) { body.classList.add('dark'); }
+                else { body.classList.remove('dark'); }
+            };
+            let isDark = localStorage.getItem('isDark') === 'true';
+            applyTheme(isDark);
+            themeToggle.addEventListener('click', () => {
+                isDark = !isDark;
+                applyTheme(isDark);
+                localStorage.setItem('isDark', isDark);
+            });
+        });
+    </script>
+</body>
+</html>

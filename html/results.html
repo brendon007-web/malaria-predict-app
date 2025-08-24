@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Results - MalariaPredict</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.css">
+    <!-- Styles are unchanged -->
+    <style>
+        .neumorphic { box-shadow: 8px 8px 15px #a3b1c6, -8px 8px 15px #ffffff; }
+        .neumorphic-dark { box-shadow: 5px 5px 10px #131820, -5px -5px 10px #212938; }
+        .dark { background-color: #1A202C; color: #E2E8F0; }
+        .medical-bg { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); min-height: 100vh; }
+        .dark .medical-bg { background: linear-gradient(135deg, #1A202C 0%, #2D3748 100%); }
+        .prediction-card { transition: all 0.4s ease; }
+        .prediction-card:hover { transform: translateY(-5px); }
+    </style>
+</head>
+<body class="medical-bg transition-all duration-300">
+    <div class="container mx-auto px-4 py-8">
+        <header class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-bold text-blue-600">MalariaPredict</h1>
+            
+            <!-- *** THIS IS THE IMPORTANT CHANGE *** -->
+            <a href="welcome.html" class="neumorphic px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">
+                &larr; New Prediction
+            </a>
+        </header>
+
+        <!-- The rest of the page (results display and script) is unchanged -->
+        <div class="neumorphic p-6 rounded-xl">
+            <h2 class="text-2xl font-semibold mb-6">Prediction Results</h2>
+            <div id="results" class="space-y-4 grid md:grid-cols-2 gap-8 items-center">
+                <div class="prediction-card p-4 rounded-lg">
+                    <canvas id="predictionChart"></canvas>
+                </div>
+                <div class="prediction-card p-4 rounded-lg mt-4">
+                    <h3 class="text-xl font-semibold mb-2">Diagnosis</h3>
+                    <div id="predictionText" class="text-lg">Loading results...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+    <script>
+        // The script at the bottom is unchanged
+        document.addEventListener('DOMContentLoaded', () => {
+            const isDark = localStorage.getItem('isDark') === 'true';
+            if (isDark) {
+                document.body.classList.add('dark');
+                document.querySelectorAll('.neumorphic').forEach(el => el.classList.add('neumorphic-dark'));
+            }
+            const resultString = localStorage.getItem('predictionResult');
+            if (!resultString) {
+                document.getElementById('predictionText').innerHTML = `
+                    <span class="text-yellow-500 font-bold text-xl">⚠️ No prediction data found.</span>
+                    <p class="mt-2">Please go back and submit patient data to generate a new prediction.</p>`;
+                document.getElementById('predictionChart').style.display = 'none';
+                return;
+            }
+            const result = JSON.parse(resultString);
+            localStorage.removeItem('predictionResult');
+            updatePredictionUI(result.positive, result.confidence);
+        });
+        function updatePredictionUI(isPositive, confidence) {
+            let positivePercent, negativePercent;
+            if (isPositive) {
+                positivePercent = confidence;
+                negativePercent = 100 - confidence;
+            } else {
+                negativePercent = confidence;
+                positivePercent = 100 - confidence;
+            }
+            const predictionTextEl = document.getElementById('predictionText');
+            if (isPositive) {
+                predictionTextEl.innerHTML = `
+                    <span class="text-red-500 font-bold text-2xl">⚠️ High probability of Malaria</span>
+                    <p class="mt-2 text-lg">Confidence in positive result: <strong>${confidence.toFixed(1)}%</strong></p>
+                    <p class="mt-4">Based on the provided data, further laboratory tests are strongly recommended for a definitive diagnosis.</p>`;
+            } else {
+                predictionTextEl.innerHTML = `
+                    <span class="text-green-500 font-bold text-2xl">✔️ Low probability of Malaria</span>
+                    <p class="mt-2 text-lg">Confidence in negative result: <strong>${confidence.toFixed(1)}%</strong></p>
+                    <p class="mt-4">The model indicates a low probability. Always consult a healthcare professional if symptoms persist.</p>`;
+            }
+            const isDark = document.body.classList.contains('dark');
+            const chartFontColor = isDark ? '#E2E8F0' : '#333';
+            const ctx = document.getElementById('predictionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Malaria Positive', 'Malaria Negative'],
+                    datasets: [{
+                        data: [positivePercent.toFixed(1), negativePercent.toFixed(1)],
+                        backgroundColor: ['#EF4444', '#10B981'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutoutPercentage: 70,
+                    legend: {
+                        position: 'bottom',
+                        labels: { fontColor: chartFontColor }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

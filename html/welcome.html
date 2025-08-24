@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MalariaPredict - JERAHUNI Hospital</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .neumorphic { box-shadow: 8px 8px 15px #a3b1c6, -8px -8px 15px #ffffff; }
+        .neumorphic-dark { box-shadow: 5px 5px 10px #131820, -5px -5px 10px #212938; }
+        .dark { background-color: #1A202C; color: #f7fafc; }
+        .input-field, .select-field {
+            transition: all 0.2s ease-in-out;
+            border-radius: 10px;
+            padding: 12px;
+            width: 100%;
+            border: 1px solid #d1d5db;
+            background-color: #ffffff;
+        }
+        .dark .input-field, .dark .select-field {
+            background-color: #2d3748;
+            border: 1px solid #5a6578;
+            color: #f7fafc;
+        }
+        .input-field:focus, .select-field:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
+        }
+        .loader-container { display: flex; justify-content: center; align-items: center; height: 50px; }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .medical-bg { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); min-height: 100vh; }
+        .dark .medical-bg { background: linear-gradient(135deg, #1A202C 0%, #2D3748 100%); }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="medical-bg transition-all duration-300">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8">
+            <div class="flex justify-center mb-4">
+                <img src="logo/logo2.jpg" alt="Logo" class="h-16 rounded-full">
+            </div>
+            <div class="flex justify-between items-center">
+                <h1 class="text-4xl font-bold text-blue-600">MalariaPredict</h1>
+                
+                <!-- *** MODIFICATION: Added History Link and wrapper div *** -->
+                <div class="flex items-center space-x-4">
+                    <a href="history.html" class="text-lg text-blue-600 hover:underline">View History</a>
+                    <button id="themeToggle" class="neumorphic px-4 py-2 rounded-lg">
+                        Theme
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="neumorphic p-6 rounded-xl">
+            <h2 class="text-2xl font-semibold mb-6">Patient Data Input</h2>
+            <form id="predictionForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                <!-- *** MODIFICATION: Added Patient Name Field *** -->
+                <div class="space-y-2 md:col-span-2">
+                    <label for="patient_name" class="block">Patient Name</label>
+                    <input type="text" id="patient_name" name="patient_name" class="input-field" required placeholder="Enter patient's full name">
+                </div>
+                
+                <!-- Vital Signs and Symptoms -->
+                <div class="space-y-2"><label for="temperature" class="block">Temperature (°C)</label><input type="number" step="0.1" id="temperature" name="Temperature" class="input-field" required></div>
+                <div class="space-y-2"><label for="heart_rate" class="block">Heart Rate (bpm)</label><input type="number" id="heart_rate" name="Heart_Rate" class="input-field" required></div>
+                <div class="space-y-2"><label for="respiratory_rate" class="block">Respiratory Rate (breaths/min)</label><input type="number" id="respiratory_rate" name="Respiratory_Rate" class="input-field" required></div>
+                <div class="space-y-2"><label for="systolic_bp" class="block">Systolic BP (mmHg)</label><input type="number" id="systolic_bp" name="Systolic_BP" class="input-field" required></div>
+                <div class="space-y-2"><label for="diastolic_bp" class="block">Diastolic BP (mmHg)</label><input type="number" id="diastolic_bp" name="Diastolic_BP" class="input-field" required></div>
+                <div class="space-y-2"><label for="spo2" class="block">SpO2 (%)</label><input type="number" id="spo2" name="SpO2" class="input-field" required></div>
+                <div class="space-y-2"><label for="headache" class="block">Headache</label><select id="headache" name="Headache" class="select-field" required><option value="0" selected>No</option><option value="1">Yes</option></select></div>
+                <div class="space-y-2"><label for="chills" class="block">Chills</label><select id="chills" name="Chills" class="select-field" required><option value="0" selected>No</option><option value="1">Yes</option></select></div>
+                <div class="space-y-2"><label for="nausea_vomiting" class="block">Nausea/Vomiting</label><select id="nausea_vomiting" name="Nausea_Vomiting" class="select-field" required><option value="0" selected>No</option><option value="1">Yes</option></select></div>
+                <div class="space-y-2"><label for="fatigue" class="block">Fatigue</label><select id="fatigue" name="Fatigue" class="select-field" required><option value="0" selected>No</option><option value="1">Yes</option></select></div>
+                <div class="space-y-2"><label for="jaundice" class="block">Jaundice</label><select id="jaundice" name="Jaundice" class="select-field" required><option value="0" selected>No</option><option value="1">Yes</option></select></div>
+                
+                <!-- Submit Button -->
+                <div class="md:col-span-2">
+                    <button type="submit" id="predictButton" class="w-full bg-blue-600 text-white py-3 mt-4 rounded-lg hover:bg-blue-700 transition-colors">
+                        Predict
+                    </button>
+                    <div id="loaderContainer" class="loader-container hidden">
+                        <div class="loader"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Reference Values Section (Unchanged) -->
+        <div class="neumorphic p-6 rounded-xl mt-8">
+            <h2 class="text-2xl font-semibold mb-4">Normal Ranges Reference</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 text-sm">
+                <div><p class="font-bold">Temperature</p><p>97°F to 99°F (36.1°C to 37.2°C)</p></div>
+                <div><p class="font-bold">Heart Rate</p><p>60 to 100 beats per minute (bpm)</p></div>
+                <div><p class="font-bold">Respiratory Rate</p><p>12 to 20 breaths per minute</p></div>
+                <div><p class="font-bold">Systolic Blood Pressure (BP)</p><p>90 to 120 mmHg</p></div>
+                <div><p class="font-bold">Diastolic Blood Pressure (BP)</p><p>60 to 80 mmHg</p></div>
+                <div><p class="font-bold">SpO2 (Oxygen Saturation)</p><p>95% to 100%</p></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // --- This entire script section is unchanged ---
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        const applyTheme = (isDark) => {
+            const elementsToToggle = document.querySelectorAll('.neumorphic, .neumorphic-dark');
+            if (isDark) {
+                body.classList.add('dark');
+                elementsToToggle.forEach(el => {
+                    el.classList.add('neumorphic-dark');
+                    el.classList.remove('neumorphic');
+                });
+            } else {
+                body.classList.remove('dark');
+                elementsToToggle.forEach(el => {
+                    el.classList.add('neumorphic');
+                    el.classList.remove('neumorphic-dark');
+                });
+            }
+        };
+        let isDark = localStorage.getItem('isDark') === 'true';
+        applyTheme(isDark);
+        themeToggle.addEventListener('click', () => {
+            isDark = !isDark;
+            localStorage.setItem('isDark', isDark);
+            applyTheme(isDark);
+        });
+
+        document.getElementById('predictionForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            document.getElementById('predictButton').classList.add('hidden');
+            document.getElementById('loaderContainer').classList.remove('hidden');
+
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            fetch('http://127.0.0.1:5000/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.error) {
+                    alert('An error occurred: ' + result.error);
+                    document.getElementById('predictButton').classList.remove('hidden');
+                    document.getElementById('loaderContainer').classList.add('hidden');
+                    return;
+                }
+                localStorage.setItem('predictionResult', JSON.stringify(result));
+                window.location.href = 'results.html';
+            })
+            .catch(error => {
+                console.error('Error connecting to the server:', error);
+                alert('Prediction failed. Please ensure the backend server is running and try again.');
+                document.getElementById('predictButton').classList.remove('hidden');
+                document.getElementById('loaderContainer').classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>

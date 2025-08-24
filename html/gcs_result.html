@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GCS Result - MalariaPredict</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .neumorphic { box-shadow: 8px 8px 15px #a3b1c6, -8px -8px 15px #ffffff; }
+        .neumorphic-dark { box-shadow: 5px 5px 10px #131820, -5px -5px 10px #212938; }
+        .medical-bg { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); min-height: 100vh;}
+        .dark .medical-bg { background: linear-gradient(135deg, #1A202C 0%, #2D3748 100%); }
+        .dark { background-color: #1A202C; color: #f7fafc; }
+    </style>
+</head>
+<body class="medical-bg transition-all duration-300">
+
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-blue-600">GCS Assessment Result</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300">The following actions are recommended based on the score.</p>
+        </header>
+
+        <div id="resultContent" class="neumorphic p-8 rounded-xl">
+            <!-- This content will be populated by JavaScript -->
+        </div>
+
+        <div class="mt-8 flex justify-center gap-4">
+            <a href="gcs.html" class="bg-blue-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-600 transition">&larr; New Assessment</a>
+            <a href="gcs_history.html" class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold py-2 px-6 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">View Full History</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const resultContent = document.getElementById('resultContent');
+            const resultDataString = localStorage.getItem('gcsResultData');
+
+            if (!resultDataString) {
+                resultContent.innerHTML = `
+                    <div class="text-center">
+                        <h2 class="text-2xl font-bold text-red-500">No Result Data Found</h2>
+                        <p class="mt-2 text-gray-600 dark:text-gray-400">Please go back and complete a new assessment to see a result.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const data = JSON.parse(resultDataString);
+
+            // Define recommended actions content
+            const actions = {
+                Mild: `
+                    <h3 class="text-xl font-semibold text-green-600 dark:text-green-400 mb-2">Recommended Actions for Mild Head Injury</h3>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
+                        <li><strong>Observation:</strong> Closely monitor the patient for any signs of deterioration (e.g., worsening headache, vomiting, confusion).</li>
+                        <li><strong>Discharge Advice:</strong> If discharged, provide clear instructions to the patient and family on when to return to the hospital.</li>
+                        <li><strong>Imaging:</strong> A CT scan is not always required but should be considered based on clinical judgment (e.g., presence of fracture, amnesia).</li>
+                        <li><strong>Follow-up:</strong> Advise a follow-up appointment with a primary care physician.</li>
+                    </ul>
+                `,
+                Moderate: `
+                    <h3 class="text-xl font-semibold text-yellow-600 dark:text-yellow-400 mb-2">Recommended Actions for Moderate Head Injury</h3>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
+                        <li><strong>Urgent CT Scan:</strong> An immediate non-contrast head CT scan is mandatory to rule out intracranial hemorrhage or other acute injuries.</li>
+                        <li><strong>Admission:</strong> The patient must be admitted to the hospital for continuous neurological observation.</li>
+                        <li><strong>Neurosurgical Consult:</strong> A consultation with a neurosurgeon is highly recommended.</li>
+                        <li><strong>Stabilization:</strong> Maintain airway, breathing, and circulation (ABC). Monitor vital signs closely.</li>
+                    </ul>
+                `,
+                Severe: `
+                    <h3 class="text-xl font-semibold text-red-600 dark:text-red-500 mb-2">Recommended Actions for Severe Head Injury (Coma)</h3>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
+                        <li><strong>Immediate Resuscitation:</strong> Prioritize airway management (intubation is likely required), breathing, and circulatory support (ABC).</li>
+                        <li><strong>Emergency CT Scan:</strong> Obtain an emergency head CT scan as soon as the patient is stabilized.</li>
+                        <li><strong>Intensive Care Unit (ICU):</strong> The patient requires admission to an ICU for advanced monitoring, including intracranial pressure (ICP) monitoring.</li>
+                        <li><strong>Emergency Neurosurgery:</strong> Immediate neurosurgical intervention may be necessary to manage conditions like hematomas.</li>
+                    </ul>
+                `
+            };
+
+            resultContent.innerHTML = `
+                <div class="text-center border-b pb-4 dark:border-gray-600">
+                    <p class="text-lg">Result for <strong>${data.patient_name}</strong></p>
+                    <p class="text-6xl font-bold ${data.colorClass} my-2">${data.total_score}</p>
+                    <p class="text-2xl font-semibold ${data.colorClass}">${data.interpretation} Head Injury</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Score Breakdown: E${data.eye_score} V${data.verbal_score} M${data.motor_score}</p>
+                </div>
+                <div class="mt-6">
+                    ${actions[data.interpretation]}
+                </div>
+            `;
+
+            // Clean up the stored data so it's not shown again
+            localStorage.removeItem('gcsResultData');
+
+            // Theme toggle logic
+            const body = document.body;
+            let isDark = localStorage.getItem('isDark') === 'true';
+            if (isDark) body.classList.add('dark');
+        });
+    </script>
+</body>
+</html>
